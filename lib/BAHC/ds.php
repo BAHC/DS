@@ -1,5 +1,5 @@
 <?php
-namespace BAHC;
+namespace BAHC\DS;
 
 class DS {
     
@@ -71,7 +71,6 @@ class DS {
         } else {
             $key = self::norm($key);
             if (self::get($key)) {
-                echo '<p>', $key;
                 unset(self::$DATA[$key]);
             }
         }
@@ -258,7 +257,7 @@ class DS {
         return $_res;
     }
 
-    private static function isDigit($v) {
+    static function isDigit($v) {
         return (\is_int($v) || \is_float($v) || \is_double($v));
     }
 

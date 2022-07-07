@@ -6,19 +6,19 @@
 <?php
 include_once 'autoloader.php';
 
-//const DEBUG = true;
-const DEBUG = false;
+const DEBUG = 1 ? false: true;
 
 $DS = new BAHC\DS\DS;
 
+$DS::preserveCase(true);
 
 echo '<h3>Put 1 '. $DS::norm('A/A->A') .'</h3>';
 $_assertion = 'FAIL';
-$_key = 'a/a->a';
-$_value = 'AA_A';
+$_key = 'A/a->B';
+$_value = 'AA_B';
 $DS::put($_key, $_value);
 $_res = $DS::get($_key);
-if (@\assert('AA_A' == $_res)){
+if (@\assert('AA_B' == $_res)){
     $_assertion = 'OK';
 }
 if (DEBUG) { echo $_value, ' = ', $_res, '<br />'; }
@@ -26,21 +26,10 @@ echo '<p class="color-', $_assertion ,'">put() ', $_assertion, '<br />';
 
 /* --------------------------------------- */
 
-echo '<h3>Get A/B</h3>';
-$_assertion = 'FAIL';
-$_key = 'a/b';
-$_value = 123;
-$DS::put($_key, $_value);
-$_res = $DS::get($_key);
-if (@\assert($_value == $_res)){
-    $_assertion = 'OK';
-}
-if (DEBUG) { echo '<p>value = ', $_value,'; ', $_key, ' = ', $_res, '<br />'; }
-echo '<p class="color-', $_assertion ,'">get() ', $_assertion, '<br />';
+echo '<h3>Put Many ', $DS::norm('A/C->[a/c->[one, two, [0, 1, [rabbits, cows, whales]]]]'), '</h3>';
 
-/* --------------------------------------- */
+$DS::preserveCase(false);
 
-echo '<h3>Put Many A/C</h3>';
 $_assertion = 'FAIL';
 $_values = [
         'a/c->one'=>1,
@@ -395,3 +384,17 @@ echo '<p>reds: ', $DS::sum('red');
 echo '<p>greens: ', $DS::sum('green');
 echo '<p>blues: ', $DS::sum('blue');
 echo '<p>all: ', $DS::sumAll();
+
+/*---------------------------------------------*/
+
+echo '<h3>Slice & Dice</h3>';
+
+$DS::flush();
+$DS::sortKeys(false);
+$DS::preserveCase(true);
+
+$data = ['one'=>1, 'Two'=>2, 'three'=>3, 'Four'=>4, 'five'=>5,];
+$DS::putMany($data, $key = 'data');
+$res = $DS::slice($DS::getAll(), 2);
+
+var_dump($res);

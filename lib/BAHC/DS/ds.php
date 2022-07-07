@@ -8,7 +8,17 @@ class DS {
 
     private static $DATA;
     private static $index = '';
-    
+    private static $preserve_case = false;
+    private static $sort_keys = false;
+
+    static function preserveCase($state=false) {
+        self::$preserve_case = (bool) $state;
+    }
+
+    static function sortKeys($state=false) {
+        self::$sort_keys = (bool) $state;
+    }
+
     static function getAll() {
         return self::$DATA;
     }
@@ -28,18 +38,18 @@ class DS {
         return $values;
     }
 
-    static function put($key='', $value=null, $sort=true) {
+    static function put($key='', $value=null) {
         if (!empty($key) && !is_null($key)) {
-            $key = self::norm( $key );
+            $key = self::norm($key);
             self::$DATA[$key] = $value;
-            if (true === $sort) { 
+            if (true === self::$sort_keys) { 
                 self::sort(); 
             }
             self::reset();
         }
     }
 
-    static function putMany($values=null, $key=null, $sort=true) {
+    static function putMany($values=null, $key=null) {
         
         if (\is_null($values)) { 
             return; 
@@ -47,15 +57,15 @@ class DS {
    
         if (\is_array($values) && \count($values)) {
             foreach ($values as $k => $v) {
-                if (!\is_null($key)) {
+                if (!empty($key) && !\is_null($key)) {
                     $k = $key . self::SPLIT . $k;
                 }
-                self::putMany($v, $k, $sort);
+                self::putMany($v, $k);
             }
         }
 
         if (!is_array($values)) {
-            self::put($key, $values, $sort);
+            self::put($key, $values);
         }
     }
     
@@ -108,7 +118,9 @@ class DS {
 
     static function norm($key) {
         if (empty($key)) return;
-        $key = \strtolower($key);
+        if (!self::$preserve_case) {
+            $key = \mb_strtolower($key, 'UTF8');
+        }
         return \str_replace (self::H_SPLIT, self::SPLIT, $key);
     }
 
@@ -279,4 +291,27 @@ class DS {
         return self::sum($tags);
     }
 
+    static function slice($haystack=[], $needle='') {
+
+        if (empty($haystack)) { 
+            return null; 
+        }
+
+        $hay = \array_values($haystack);
+        $idx = \array_search($needle, $hay);
+
+        if (!$idx) { 
+            return null; 
+        }
+
+        $slice = \array_slice($hay, $idx, \count($hay), true);
+        if (\count($slice)) {
+            $res = \array_intersect($haystack, $slice);
+            if (\count($res)) {
+                \array_shift($res);
+            }
+        }
+
+        return $res;
+    }
 }

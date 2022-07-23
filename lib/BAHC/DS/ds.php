@@ -1,8 +1,7 @@
-<?php
-namespace BAHC\DS;
+<?php namespace BAHC\DS;
 
 class DS {
-    
+
     const SPLIT = ' ⇢ ';
     const H_SPLIT = '->';
 
@@ -68,22 +67,26 @@ class DS {
             self::put($key, $values);
         }
     }
-    
+
     static function flush() {
         self::$DATA = [];
     }
 
-    static function forget($key) {
+    static function forget($key, $_tags=[]) {
         if (is_array($key)) {
             foreach($key as $k) {
-                self::forget($k);
+                $_tags = self::forget($k, $_tags);
             }
         } else {
             $key = self::norm($key);
             if (self::get($key)) {
-                unset(self::$DATA[$key]);
+                $_tags[] = $key;
+                if (self::get($key)) {
+                    unset(self::$DATA[$key]);
+                }
             }
         }
+        return $_tags;
     }
 
     static function increment($key, $increment=1) {
@@ -221,7 +224,6 @@ class DS {
         $idx = self::getIndex();
         return self::get($idx);
     }
-
 
     static function toArray($ds='') {
         
